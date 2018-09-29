@@ -7,7 +7,9 @@ CONFIG += thread
 CONFIG -= qt
 
 HEADERS += \
-        tst_lexertest.h
+        tst_lexertest.h \
+    token.h
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+    token.cpp
