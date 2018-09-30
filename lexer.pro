@@ -8,10 +8,12 @@ CONFIG -= qt
 
 HEADERS += \
         tst_lexertest.h \
-    token.h \
-    lexer.h
+        tst_tokentest.h \
+        token.h \
+        lexer.h \
+    tst_tokentest.h
 
 SOURCES += \
         main.cpp \
-    token.cpp \
-    lexer.cpp
+        token.cpp \
+        lexer.cpp

@@ -3,6 +3,7 @@
 
 #include "token.h"
 #include <istream>
+#include <sstream>
 
 using std::string;
 
@@ -11,17 +12,22 @@ class lexer
 public:
 
     lexer();
+
     void tokenizeStream(std::istream& input);
+
     tokenList& getTokens();
-    bool isValid();
-    void checkForErrors();
+
+//    bool isValid();
+//    void checkForErrors();
+
 
     bool isCurrentCharSequenceNotEmpty();
     void updateLexerStateAfterNewlineChar();
+    void updateLexerStateAtEndOfStream();
 
-    void processCharWithinString();
-    void processCharWithinComment();
-    void processCharOutsideOfString();
+    void processCharWithinString(char currentChar);
+    void processCharWithinComment(char currentChar);
+    void processCharOutsideOfString(char currentChar);
 
     void handleEOL();
     void handleWhitespace();
@@ -36,20 +42,22 @@ public:
     void addTokenSTRING();
     void handleSTRING();
 
-    void addTokenERROR();
+    void addTokenStringDelimiterError();
+    void addTokenParenthesesError();
     void handleERROR();
+    bool isStringDelimiterErrorPresent();
+    bool isParenthesesErrorPresent();
 
-private:
+protected:
 
     tokenList tokenizedText;
 
     size_t currentLine;
     string currentCharSequence;
-    char currentChar;
 
     bool withinComment;
     bool withinString;
-    size_t parenthesesDepth;
+    int parenthesesDepth;
 
     bool stringDelimiterError;
     bool parenthesesError;

@@ -8,42 +8,48 @@ lexer::lexer()
     stringDelimiterError = false;
 
     currentLine = 1;
-    currentChar = '~';
     parenthesesDepth = 0;
     currentCharSequence;
+    tokenizedText;
 }
 
 void lexer::tokenizeStream(std::istream& input)
 {
-    //    char currentChar;
-    while (input.get(currentChar))
+    char inputChar;
+    while (input.get(inputChar))
     {
-        if (currentChar == '\n')
+        if (inputChar == '\n')
         {
             handleEOL();
         }
         else if (withinString)
         {
-            processCharWithinString();
+            processCharWithinString(inputChar);
         }
         else if (withinComment)
         {
-            processCharWithinComment();
+            processCharWithinComment(inputChar);
         }
         else
         {
-            processCharOutsideOfString();
+            processCharOutsideOfString(inputChar);
         }
     }
-    checkForErrors();
+    updateLexerStateAtEndOfStream();
+    handleERROR();
 }
 
-void lexer::processCharWithinComment()
+tokenList& lexer::getTokens()
+{
+    return tokenizedText;
+}
+
+void lexer::processCharWithinComment(char currentChar)
 {
     // ignore comment character.
 }
 
-void lexer::processCharWithinString()
+void lexer::processCharWithinString(char currentChar)
 {
     if (currentChar == '\"')
     {
@@ -55,7 +61,7 @@ void lexer::processCharWithinString()
     }
 }
 
-void lexer::processCharOutsideOfString()
+void lexer::processCharOutsideOfString(char currentChar)
 {
     switch (currentChar)
     {
@@ -117,35 +123,6 @@ void lexer::processCharOutsideOfString()
     }
 }
 
-//    }
-
-//    if (stringDelimiterError)
-//    {
-//        // string delimiter error.
-//    }
-
-//    if (parenthesesError || parenthesesDepth != 0)
-//    {
-//        // parentheses error.
-//    }
-
-void lexer::checkForErrors()
-{
-    //TODO: determine best way to handle errors in tokenizing
-
-    if (stringDelimiterError)
-    {
-        addTokenERROR();
-    }
-
-    if (parenthesesError || parenthesesDepth != 0)
-    {
-        addTokenERROR();
-    }
-
-
-}
-
 void lexer::handleEOL()
 {
     handleSTRING();
@@ -155,6 +132,26 @@ void lexer::handleEOL()
 
 void lexer::updateLexerStateAfterNewlineChar()
 {
+    if (withinComment)
+    {
+        withinComment = false;
+    }
+
+    if (withinString)
+    {
+        stringDelimiterError = true;
+    }
+
+    if (parenthesesDepth != 0)
+    {
+        parenthesesError = true;
+    }
+}
+
+void lexer::updateLexerStateAtEndOfStream()
+{
+    handleSTRING();
+
     if (withinComment)
     {
         withinComment = false;
@@ -237,4 +234,40 @@ void lexer::addTokenSTRING()
 bool lexer::isCurrentCharSequenceNotEmpty()
 {
     return !currentCharSequence.empty();
+}
+
+void lexer::handleERROR()
+{
+    if (stringDelimiterError)
+    {
+        addTokenStringDelimiterError();
+    }
+
+    if (parenthesesError || parenthesesDepth != 0)
+    {
+        addTokenParenthesesError();
+    }
+}
+
+void lexer::addTokenStringDelimiterError()
+{
+    tokenizedText.emplace_back(ERROR, currentLine, "ERROR: missing STRING_DELIM character");
+}
+
+void lexer::addTokenParenthesesError()
+{
+    std::stringstream ss;
+    ss << "ERROR: unmatched parentheses --> depth = " << parenthesesDepth;
+
+    tokenizedText.emplace_back(ERROR, currentLine, ss.str());
+}
+
+bool lexer::isStringDelimiterErrorPresent()
+{
+    return stringDelimiterError;
+}
+
+bool lexer::isParenthesesErrorPresent()
+{
+    return parenthesesError;
 }
