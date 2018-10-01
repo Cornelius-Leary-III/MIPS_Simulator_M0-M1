@@ -2,6 +2,9 @@
 #define DECLARATIONPARSER_H
 
 #include "token.h"
+#include <string>
+
+using std::string;
 
 class DeclarationParser
 {
@@ -16,9 +19,9 @@ public:
     bool parse_StringLayout();
     bool parse_Integer();
     bool parse_String();
-    bool parse_Digit();
-    bool parse_Alpha();
-    bool parse_Char();
+    bool parse_Digit(char currentChar);
+    bool parse_Alpha(char currentChar);
+    bool parse_Char(char currentChar);
 
 private:
 
