@@ -11,9 +11,16 @@ HEADERS += \
         tst_tokentest.h \
         token.h \
         lexer.h \
-    tst_tokentest.h
+    tst_tokentest.h \
+    parser.h \
+    tst_parsertest.h \
+    InstructionParser.h \
+    DeclarationParser.h
 
 SOURCES += \
         main.cpp \
         token.cpp \
-        lexer.cpp
+        lexer.cpp \
+    parser.cpp \
+    InstructionParser.cpp \
+    DeclarationParser.cpp

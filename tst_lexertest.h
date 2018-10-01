@@ -7,23 +7,6 @@
 
 using namespace testing;
 
-//class LexerTest : public ::testing::Test
-//{
-//protected:
-
-//    void SetUp() override
-//    {
-
-//    }
-//};
-
-
-TEST(lexerTest, lexerTestSet)
-{
-    EXPECT_EQ(1, 1);
-    ASSERT_THAT(0, Eq(0));
-}
-
 TEST(lexerTest, lexerConstructor)
 {
     lexer testLexer;
@@ -216,6 +199,27 @@ TEST(lexerTest, onlyCommentChar)
     EXPECT_TRUE(testLexer.getTokens().empty());
 }
 
+TEST(lexerTest, commentFollowedByEOL)
+{
+    std::stringstream testSS;
+    testSS << "# test comment \n";
+
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 1);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+}
+
 TEST(lexerTest, oneOPEN_PARENCharOnly)
 {
     std::stringstream testSS;
@@ -349,11 +353,445 @@ TEST(lexerTest, parenthesesPairReverseOrder)
     EXPECT_TRUE(tokensIter->contents().empty());
 }
 
+TEST(lexerTest, oneOPEN_PARENCharFollowedByEOL)
+{
+    std::stringstream testSS;
+    testSS << "(\n";
 
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
 
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_TRUE(testLexer.isParenthesesErrorPresent());
 
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 3);
 
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
 
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
 
+    EXPECT_EQ((++tokensIter)->type(), ERROR);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_EQ(tokensIter->contents().substr(0, 7), "ERROR: ");
+}
 
+TEST(lexerTest, oneCLOSE_PARENCharFollowedByEOL)
+{
+    std::stringstream testSS;
+    testSS << ")\n";
 
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_TRUE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 3);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), ERROR);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_EQ(tokensIter->contents().substr(0, 7), "ERROR: ");
+}
+
+TEST(lexerTest, parenthesesPairSplitByEOL)
+{
+    std::stringstream testSS;
+    testSS << "(\n)";
+
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_TRUE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 4);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), ERROR);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_EQ(tokensIter->contents().substr(0, 7), "ERROR: ");
+}
+
+TEST(lexerTest, STRING_DELIMPairSplitByEOL)
+{
+    std::stringstream testSS;
+    testSS << "\"\n\"";
+
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_TRUE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 4);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), STRING_DELIM);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING_DELIM);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), ERROR);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_EQ(tokensIter->contents().substr(0, 7), "ERROR: ");
+}
+
+TEST(lexerTest, twoStrings)
+{
+    std::stringstream testSS;
+    testSS << "test strings";
+
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 2);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+}
+
+TEST(lexerTest, fiveStrings)
+{
+    std::stringstream testSS;
+    testSS << "test strings can be useful";
+
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 5);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+}
+
+TEST(lexerTest, fiveStringsSeparateLines)
+{
+    std::stringstream testSS;
+    testSS << "test\nstrings\ncan\nbe\nuseful";
+
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 9);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 3);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 3);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 4);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 4);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 5);
+    EXPECT_FALSE(tokensIter->contents().empty());
+}
+
+TEST(lexerTest, fiveStringsSeparateLinesEndsWithEOL)
+{
+    std::stringstream testSS;
+    testSS << "test\nstrings\ncan\nbe\nuseful\n";
+
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 10);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 3);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 3);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 4);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 4);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 5);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 5);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+}
+
+TEST(lexerTest, listOfStringsSeparatedByCommas)
+{
+    std::stringstream testSS;
+    testSS << "test, strings,can, be,useful";
+
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 9);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), SEP);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), SEP);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), SEP);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), SEP);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+}
+
+TEST(lexerTest, multiplePairsOfParentheses)
+{
+    std::stringstream testSS;
+    testSS << "((test) strings,can,) (((be,)useful)!)";
+
+    lexer testLexer;
+    testLexer.tokenizeStream(testSS);
+
+    EXPECT_FALSE(testLexer.isStringDelimiterErrorPresent());
+    EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
+
+    auto tokenSet = testLexer.getTokens();
+    EXPECT_FALSE(tokenSet.empty());
+    EXPECT_EQ(tokenSet.size(), 19);
+
+    auto tokensIter = tokenSet.begin();
+    EXPECT_EQ(tokensIter->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), SEP);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), SEP);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), SEP);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), STRING);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+}

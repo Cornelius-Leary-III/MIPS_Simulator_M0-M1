@@ -16,8 +16,15 @@ lexer::lexer()
 void lexer::tokenizeStream(std::istream& input)
 {
     char inputChar;
+    char previousChar = '~';
+
     while (input.get(inputChar))
     {
+        if (previousChar == '\n')
+        {
+            ++currentLine;
+        }
+
         if (inputChar == '\n')
         {
             handleEOL();
@@ -34,6 +41,8 @@ void lexer::tokenizeStream(std::istream& input)
         {
             processCharOutsideOfString(inputChar);
         }
+
+        previousChar = inputChar;
     }
     updateLexerStateAtEndOfStream();
     handleERROR();
@@ -128,6 +137,7 @@ void lexer::handleEOL()
     handleSTRING();
     updateLexerStateAfterNewlineChar();
     addTokenWithoutContents(EOL);
+//    ++currentLine;
 }
 
 void lexer::updateLexerStateAfterNewlineChar()
