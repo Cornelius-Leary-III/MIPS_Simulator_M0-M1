@@ -26,6 +26,7 @@ bool DeclarationParser::parse_Declaration()
     if (parse_Label())
     {
         ++currentToken;
+        auto optionalLabelLayoutToken = currentToken;
 
         if (parse_Layout())
         {
@@ -37,13 +38,24 @@ bool DeclarationParser::parse_Declaration()
         }
         else
         {
-            currentToken = firstToken;
+            currentToken = optionalLabelLayoutToken;
+            if (currentToken->type() == EOL)
+            {
+                return true;
+            }
         }
     }
 
+    currentToken = firstToken;
+
+    token tokenBeforeLayoutParsing = *currentToken;
+    token tokenAfterLayoutParsing = *currentToken;
+
     if (parse_Layout())
     {
-        ++currentToken;
+        tokenAfterLayoutParsing = *currentToken;
+
+//        ++currentToken;
         if (currentToken->type() == EOL)
         {
             return true;
@@ -188,6 +200,7 @@ bool DeclarationParser::parse_Layout()
 
         if (parse_String())
         {
+            ++currentToken;
             return true;
         }
     }
@@ -308,6 +321,13 @@ bool DeclarationParser::parse_String()
         }
 
         ++currentChar;
+    }
+
+    ++currentToken;
+    if (currentToken->type() != STRING_DELIM)
+    {
+        currentToken = savedToken;
+        return false;
     }
 
     return true;

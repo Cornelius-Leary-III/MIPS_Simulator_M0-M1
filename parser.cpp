@@ -43,10 +43,13 @@ bool parser::parseStream(std::istream& streamToParse)
     token tokenStateInMiddleOfLoop = *tokenIter;
     token tokenStateAtEndOfLoop = *tokenIter;
 
+    tokenList::iterator parsingLoopIter = tokenIter;
 
-    while (tokenIter != tokensEnd /*&&
-           streamParsedSafely)*/)
+    while (parsingLoopIter != tokensEnd &&
+           streamParsedSafely)
     {
+        parsingLoopIter = tokenIter;
+
         if (checkForGrammarChanges())
         {
             ++tokenIter;
