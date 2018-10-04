@@ -59,7 +59,7 @@ TEST(lexerTest, onlySEPChar)
     EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
 
     EXPECT_FALSE(testLexer.getTokens().empty());
-    EXPECT_EQ(testLexer.getTokens().size(), 1);
+    EXPECT_EQ(testLexer.getTokens().size(), 2);
 
     EXPECT_EQ(testLexer.getTokens().front().type(), SEP);
     EXPECT_NE(testLexer.getTokens().back().type(), ERROR);
@@ -77,7 +77,7 @@ TEST(lexerTest, onlyEQUALChar)
     EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
 
     EXPECT_FALSE(testLexer.getTokens().empty());
-    EXPECT_EQ(testLexer.getTokens().size(), 1);
+    EXPECT_EQ(testLexer.getTokens().size(), 2);
 
     EXPECT_EQ(testLexer.getTokens().front().type(), EQUAL);
     EXPECT_NE(testLexer.getTokens().back().type(), ERROR);
@@ -95,7 +95,7 @@ TEST(lexerTest, oneSTRING_DELIMCharOnly)
     EXPECT_FALSE(testLexer.isParenthesesErrorPresent());
 
     EXPECT_FALSE(testLexer.getTokens().empty());
-    EXPECT_EQ(testLexer.getTokens().size(), 2);
+    EXPECT_EQ(testLexer.getTokens().size(), 3);
 
     EXPECT_EQ(testLexer.getTokens().front().type(), STRING_DELIM);
     EXPECT_EQ(testLexer.getTokens().back().type(), ERROR);
@@ -115,7 +115,7 @@ TEST(lexerTest, twoSTRING_DELIMCharsOnly)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 2);
+    EXPECT_EQ(tokenSet.size(), 3);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), STRING_DELIM);
@@ -123,6 +123,10 @@ TEST(lexerTest, twoSTRING_DELIMCharsOnly)
     EXPECT_TRUE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), STRING_DELIM);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_TRUE(tokensIter->contents().empty());
 }
@@ -140,7 +144,7 @@ TEST(lexerTest, textMissingOneSTRING_DELIMChar)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 3);
+    EXPECT_EQ(tokenSet.size(), 4);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), STRING_DELIM);
@@ -150,6 +154,10 @@ TEST(lexerTest, textMissingOneSTRING_DELIMChar)
     EXPECT_EQ((++tokensIter)->type(), STRING);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), ERROR);
     EXPECT_EQ(tokensIter->line(), 1);
@@ -170,7 +178,7 @@ TEST(lexerTest, textBetweenTwoSTRING_DELIMChars)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 3);
+    EXPECT_EQ(tokenSet.size(), 4);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), STRING_DELIM);
@@ -182,6 +190,10 @@ TEST(lexerTest, textBetweenTwoSTRING_DELIMChars)
     EXPECT_FALSE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), STRING_DELIM);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_TRUE(tokensIter->contents().empty());
 }
@@ -233,10 +245,14 @@ TEST(lexerTest, oneOPEN_PARENCharOnly)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 2);
+    EXPECT_EQ(tokenSet.size(), 3);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_TRUE(tokensIter->contents().empty());
 
@@ -258,7 +274,7 @@ TEST(lexerTest, twoOPEN_PARENCharOnly)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 3);
+    EXPECT_EQ(tokenSet.size(), 4);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), OPEN_PAREN);
@@ -266,6 +282,10 @@ TEST(lexerTest, twoOPEN_PARENCharOnly)
     EXPECT_TRUE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_TRUE(tokensIter->contents().empty());
 
@@ -287,7 +307,7 @@ TEST(lexerTest, twoCLOSE_PARENCharOnly)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 3);
+    EXPECT_EQ(tokenSet.size(), 4);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), CLOSE_PAREN);
@@ -295,6 +315,10 @@ TEST(lexerTest, twoCLOSE_PARENCharOnly)
     EXPECT_TRUE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_TRUE(tokensIter->contents().empty());
 
@@ -316,7 +340,7 @@ TEST(lexerTest, parenthesesPairCorrectOrder)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 2);
+    EXPECT_EQ(tokenSet.size(), 3);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), OPEN_PAREN);
@@ -324,6 +348,10 @@ TEST(lexerTest, parenthesesPairCorrectOrder)
     EXPECT_TRUE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_TRUE(tokensIter->contents().empty());
 }
@@ -341,7 +369,7 @@ TEST(lexerTest, parenthesesPairReverseOrder)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 2);
+    EXPECT_EQ(tokenSet.size(), 3);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), CLOSE_PAREN);
@@ -349,6 +377,10 @@ TEST(lexerTest, parenthesesPairReverseOrder)
     EXPECT_TRUE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), OPEN_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_TRUE(tokensIter->contents().empty());
 }
@@ -424,7 +456,7 @@ TEST(lexerTest, parenthesesPairSplitByEOL)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 4);
+    EXPECT_EQ(tokenSet.size(), 5);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), OPEN_PAREN);
@@ -436,6 +468,10 @@ TEST(lexerTest, parenthesesPairSplitByEOL)
     EXPECT_TRUE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 2);
     EXPECT_TRUE(tokensIter->contents().empty());
 
@@ -457,7 +493,7 @@ TEST(lexerTest, STRING_DELIMPairSplitByEOL)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 4);
+    EXPECT_EQ(tokenSet.size(), 5);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), STRING_DELIM);
@@ -469,6 +505,10 @@ TEST(lexerTest, STRING_DELIMPairSplitByEOL)
     EXPECT_TRUE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), STRING_DELIM);
+    EXPECT_EQ(tokensIter->line(), 2);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 2);
     EXPECT_TRUE(tokensIter->contents().empty());
 
@@ -490,7 +530,7 @@ TEST(lexerTest, twoStrings)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 2);
+    EXPECT_EQ(tokenSet.size(), 3);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), STRING);
@@ -500,6 +540,10 @@ TEST(lexerTest, twoStrings)
     EXPECT_EQ((++tokensIter)->type(), STRING);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
 }
 
 TEST(lexerTest, fiveStrings)
@@ -515,7 +559,7 @@ TEST(lexerTest, fiveStrings)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 5);
+    EXPECT_EQ(tokenSet.size(), 6);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), STRING);
@@ -537,6 +581,10 @@ TEST(lexerTest, fiveStrings)
     EXPECT_EQ((++tokensIter)->type(), STRING);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
 }
 
 TEST(lexerTest, fiveStringsSeparateLines)
@@ -552,7 +600,7 @@ TEST(lexerTest, fiveStringsSeparateLines)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 9);
+    EXPECT_EQ(tokenSet.size(), 10);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), STRING);
@@ -590,6 +638,10 @@ TEST(lexerTest, fiveStringsSeparateLines)
     EXPECT_EQ((++tokensIter)->type(), STRING);
     EXPECT_EQ(tokensIter->line(), 5);
     EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 5);
+    EXPECT_TRUE(tokensIter->contents().empty());
 }
 
 TEST(lexerTest, fiveStringsSeparateLinesEndsWithEOL)
@@ -663,7 +715,7 @@ TEST(lexerTest, listOfStringsSeparatedByCommas)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 9);
+    EXPECT_EQ(tokenSet.size(), 10);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), STRING);
@@ -701,6 +753,10 @@ TEST(lexerTest, listOfStringsSeparatedByCommas)
     EXPECT_EQ((++tokensIter)->type(), STRING);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_FALSE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
 }
 
 TEST(lexerTest, multiplePairsOfParentheses)
@@ -716,7 +772,7 @@ TEST(lexerTest, multiplePairsOfParentheses)
 
     auto tokenSet = testLexer.getTokens();
     EXPECT_FALSE(tokenSet.empty());
-    EXPECT_EQ(tokenSet.size(), 19);
+    EXPECT_EQ(tokenSet.size(), 20);
 
     auto tokensIter = tokenSet.begin();
     EXPECT_EQ(tokensIter->type(), OPEN_PAREN);
@@ -792,6 +848,10 @@ TEST(lexerTest, multiplePairsOfParentheses)
     EXPECT_FALSE(tokensIter->contents().empty());
 
     EXPECT_EQ((++tokensIter)->type(), CLOSE_PAREN);
+    EXPECT_EQ(tokensIter->line(), 1);
+    EXPECT_TRUE(tokensIter->contents().empty());
+
+    EXPECT_EQ((++tokensIter)->type(), EOL);
     EXPECT_EQ(tokensIter->line(), 1);
     EXPECT_TRUE(tokensIter->contents().empty());
 }

@@ -23,7 +23,7 @@ bool parser::parseStream(std::istream& streamToParse)
     tokenStream = tokenizer.getTokens();
     tokenStreamSafeCopy = tokenizer.getTokens();
     auto firstToken = tokenStream.begin();
-    auto tokenEnd = tokenStream.end();
+    tokensEnd = tokenStream.end();
 
     tokenIter = tokenStream.begin();
     tokenAtStartOfCurrentLine = tokenStream.begin();
@@ -39,13 +39,17 @@ bool parser::parseStream(std::istream& streamToParse)
     int textGrammarCounter = 0;
     int elseOptionGrammar = 0;
 
-    while (tokenIter != tokenEnd &&
-           streamParsedSafely)
-    {
-        getAllTokensOnCurrentLine();
+    token tokenStateAtStartOfLoop = *tokenIter;
+    token tokenStateInMiddleOfLoop = *tokenIter;
+    token tokenStateAtEndOfLoop = *tokenIter;
 
+
+    while (tokenIter != tokensEnd /*&&
+           streamParsedSafely)*/)
+    {
         if (checkForGrammarChanges())
         {
+            ++tokenIter;
             ++grammarChangeCounter;
         }
         else if (dataGrammarActive)
@@ -65,7 +69,12 @@ bool parser::parseStream(std::istream& streamToParse)
             ++elseOptionGrammar;
         }
 
+        tokenStateInMiddleOfLoop = *tokenIter;
+
         updateTokenIter();
+        getAllTokensOnCurrentLine();
+
+        tokenStateAtEndOfLoop = *tokenIter;
 
         ++loopCounter;
     }
@@ -73,15 +82,8 @@ bool parser::parseStream(std::istream& streamToParse)
     return streamParsedSafely;
 }
 
-// TODO: function to grab current line / next line (until EOL or EOF) of tokens
-//      for parsers.
-
-// TODO: function to determine grammar?
-
 bool parser::dataGrammarParsing()
 {
-//    getAllTokensOnCurrentLine();
-
     if (declarationProcessor != nullptr)
     {
         delete declarationProcessor;
@@ -94,8 +96,6 @@ bool parser::dataGrammarParsing()
 
 bool parser::textGrammarParsing()
 {
-//    getAllTokensOnCurrentLine();
-
     if (instructionProcessor != nullptr)
     {
         delete instructionProcessor;
@@ -178,12 +178,9 @@ bool parser::checkIfTextGrammar()
 
 void parser::getAllTokensOnCurrentLine()
 {
-    tokenIter = tokenAtStartOfCurrentLine;
+    ++currentLineNum;
 
     token debugStartOfCurrentLineToken = *tokenIter;
-
-
-    auto tokensEnd = tokenStream.end();
 
     tokensOnCurrentLine.clear();
 
@@ -193,41 +190,16 @@ void parser::getAllTokensOnCurrentLine()
         tokensOnCurrentLine.push_back(*tokenIter);
         ++tokenIter;
     }
-
-//    while (currentToken != tokensEnd &&
-//           currentToken->line() == currentLineNum)
-//    {
-//        tokensOnCurrentLine.push_back(*currentToken);
-//        ++currentToken;
-//    }
-
-//    if (tokenIter != tokensEnd)
-//    {
-//        if (tokenIter->type() == EOL)
-//        {
-//            tokensOnCurrentLine.push_back(*tokenIter);
-//        }
-//    }
-
-    tokenIter = tokenAtStartOfCurrentLine;
-    ++currentLineNum;
 }
 
 void parser::updateTokenIter()
 {
-    auto tokensEnd = tokenStream.end();
-
-//    auto tokenIncrement = tokensOnCurrentLine.size();
-//    unsigned long step = 0;
-
     int tokenIncrCounter = 0;
 
     while (tokenAtStartOfCurrentLine != tokensEnd &&
            tokenAtStartOfCurrentLine->line() != currentLineNum)
     {
         ++tokenAtStartOfCurrentLine;
-//        ++step;
-
         ++tokenIncrCounter;
     }
 }

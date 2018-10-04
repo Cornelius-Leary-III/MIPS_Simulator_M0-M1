@@ -44,7 +44,8 @@ void lexer::tokenizeStream(std::istream& input)
 
         previousChar = inputChar;
     }
-    updateLexerStateAtEndOfStream();
+
+    updateLexerStateAtEndOfStream(previousChar);
     handleERROR();
 }
 
@@ -158,9 +159,15 @@ void lexer::updateLexerStateAfterNewlineChar()
     }
 }
 
-void lexer::updateLexerStateAtEndOfStream()
+void lexer::updateLexerStateAtEndOfStream(char finalChar)
 {
     handleSTRING();
+
+    if (finalChar != '\n' &&
+        !tokenizedText.empty())
+    {
+        addTokenWithoutContents(EOL);
+    }
 
     if (withinComment)
     {

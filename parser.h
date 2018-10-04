@@ -35,6 +35,7 @@ private:
     InstructionParser* instructionProcessor;
 
     tokenList::iterator tokenIter;
+    tokenList::iterator tokensEnd;
     tokenList::iterator tokenAtStartOfCurrentLine;
     tokenList tokenStream;
     tokenList tokenStreamSafeCopy;

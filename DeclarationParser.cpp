@@ -12,29 +12,36 @@ bool DeclarationParser::parse_Declaration()
 
     if (parse_Constant())
     {
-        //TODO: determine where it is best to increment the current token in order to accurately parse.
-
         ++currentToken;
         if (currentToken->type() == EOL)
         {
             return true;
         }
     }
-    else if (parse_Label())
+    else
+    {
+        currentToken = firstToken;
+    }
+
+    if (parse_Label())
     {
         ++currentToken;
 
         if (parse_Layout())
         {
             ++currentToken;
+            if (currentToken->type() == EOL)
+            {
+                return true;
+            }
         }
-
-        if (currentToken->type() == EOL)
+        else
         {
-            return true;
+            currentToken = firstToken;
         }
     }
-    else if (parse_Layout())
+
+    if (parse_Layout())
     {
         ++currentToken;
         if (currentToken->type() == EOL)
@@ -43,6 +50,7 @@ bool DeclarationParser::parse_Declaration()
         }
     }
 
+    currentToken = firstToken;
     return false;
 }
 

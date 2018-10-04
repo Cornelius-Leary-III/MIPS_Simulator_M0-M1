@@ -23,7 +23,7 @@ public:
 
     bool isCurrentCharSequenceNotEmpty();
     void updateLexerStateAfterNewlineChar();
-    void updateLexerStateAtEndOfStream();
+    void updateLexerStateAtEndOfStream(char finalChar);
 
     void processCharWithinString(char currentChar);
     void processCharWithinComment(char currentChar);
