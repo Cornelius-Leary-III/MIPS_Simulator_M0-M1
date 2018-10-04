@@ -5,8 +5,12 @@ parser::parser()
     tokenizer;
     tokenStream;
     tokensOnCurrentLine;
+    currentLineNum = 1;
 
-    streamParsedSafely = false;
+    streamParsedSafely = true;
+
+    dataGrammarActive = false;
+    textGrammarActive = false;
 
     declarationProcessor = nullptr;
     instructionProcessor = nullptr;
@@ -22,25 +26,51 @@ bool parser::parseStream(std::istream& streamToParse)
     auto tokenEnd = tokenStream.end();
 
     tokenIter = tokenStream.begin();
+    tokenAtStartOfCurrentLine = tokenStream.begin();
+
+    if (!tokenStream.empty())
+    {
+        currentLineNum = firstToken->line();
+    }
+
+    int loopCounter = 0;
+    int grammarChangeCounter = 0;
+    int dataGrammarCounter = 0;
+    int textGrammarCounter = 0;
+    int elseOptionGrammar = 0;
 
     while (tokenIter != tokenEnd &&
            streamParsedSafely)
     {
-        checkForGrammarChanges();
+        getAllTokensOnCurrentLine();
 
-        if (dataGrammarActive)
+        if (checkForGrammarChanges())
+        {
+            ++grammarChangeCounter;
+        }
+        else if (dataGrammarActive)
         {
             streamParsedSafely = dataGrammarParsing();
+
+            ++dataGrammarCounter;
         }
         else if (textGrammarActive)
         {
             streamParsedSafely = textGrammarParsing();
+
+            ++textGrammarCounter;
+        }
+        else
+        {
+            ++elseOptionGrammar;
         }
 
         updateTokenIter();
+
+        ++loopCounter;
     }
 
-    return true;
+    return streamParsedSafely;
 }
 
 // TODO: function to grab current line / next line (until EOL or EOF) of tokens
@@ -50,7 +80,7 @@ bool parser::parseStream(std::istream& streamToParse)
 
 bool parser::dataGrammarParsing()
 {
-    getAllTokensOnCurrentLine();
+//    getAllTokensOnCurrentLine();
 
     if (declarationProcessor != nullptr)
     {
@@ -64,7 +94,7 @@ bool parser::dataGrammarParsing()
 
 bool parser::textGrammarParsing()
 {
-    getAllTokensOnCurrentLine();
+//    getAllTokensOnCurrentLine();
 
     if (instructionProcessor != nullptr)
     {
@@ -77,7 +107,7 @@ bool parser::textGrammarParsing()
 }
 
 
-void parser::checkForGrammarChanges()
+bool parser::checkForGrammarChanges()
 {
     auto savedTokenIter = tokenIter;
 
@@ -91,8 +121,13 @@ void parser::checkForGrammarChanges()
         dataGrammarActive = false;
         textGrammarActive = true;
     }
+    else
+    {
+        tokenIter = savedTokenIter;
+        return false;
+    }
 
-    tokenIter = savedTokenIter;
+    return true;
 }
 
 bool parser::checkIfDataGrammar()
@@ -143,41 +178,57 @@ bool parser::checkIfTextGrammar()
 
 void parser::getAllTokensOnCurrentLine()
 {
-    auto currentToken = tokenIter;
+    tokenIter = tokenAtStartOfCurrentLine;
+
+    token debugStartOfCurrentLineToken = *tokenIter;
+
+
     auto tokensEnd = tokenStream.end();
 
     tokensOnCurrentLine.clear();
 
-    while (currentToken != tokensEnd &&
-           currentToken->type() != EOL)
+    while (tokenIter != tokensEnd &&
+           tokenIter->line() == currentLineNum)
     {
-        tokensOnCurrentLine.push_back(*currentToken);
-        ++currentToken;
+        tokensOnCurrentLine.push_back(*tokenIter);
+        ++tokenIter;
     }
 
-    if (currentToken != tokensEnd)
-    {
-        if (currentToken->type() == EOL)
-        {
-            tokensOnCurrentLine.push_back(*currentToken);
-        }
+//    while (currentToken != tokensEnd &&
+//           currentToken->line() == currentLineNum)
+//    {
+//        tokensOnCurrentLine.push_back(*currentToken);
+//        ++currentToken;
+//    }
 
-        tokenIter = (++currentToken);
-    }
-    else
-    {
-        tokenIter = currentToken;
-    }
+//    if (tokenIter != tokensEnd)
+//    {
+//        if (tokenIter->type() == EOL)
+//        {
+//            tokensOnCurrentLine.push_back(*tokenIter);
+//        }
+//    }
+
+    tokenIter = tokenAtStartOfCurrentLine;
+    ++currentLineNum;
 }
 
 void parser::updateTokenIter()
 {
-    auto tokenIncrement = tokensOnCurrentLine.size();
-    unsigned long step = 0;
+    auto tokensEnd = tokenStream.end();
 
-    while (step < tokenIncrement)
+//    auto tokenIncrement = tokensOnCurrentLine.size();
+//    unsigned long step = 0;
+
+    int tokenIncrCounter = 0;
+
+    while (tokenAtStartOfCurrentLine != tokensEnd &&
+           tokenAtStartOfCurrentLine->line() != currentLineNum)
     {
-        ++tokenIter;
+        ++tokenAtStartOfCurrentLine;
+//        ++step;
+
+        ++tokenIncrCounter;
     }
 }
 

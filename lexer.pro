@@ -15,7 +15,8 @@ HEADERS += \
     parser.h \
     tst_parsertest.h \
     InstructionParser.h \
-    DeclarationParser.h
+    DeclarationParser.h \
+    tst_declarationparsertest.h
 
 SOURCES += \
         main.cpp \

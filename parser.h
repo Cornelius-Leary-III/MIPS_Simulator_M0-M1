@@ -5,6 +5,9 @@
 #include "DeclarationParser.h"
 #include "InstructionParser.h"
 
+#include <sstream>
+using std::stringstream;
+
 class parser
 {
 public:
@@ -15,7 +18,7 @@ public:
     bool parseStream(std::istream& streamToParse);
 //    bool isParsingSuccessful();
 
-    void checkForGrammarChanges();
+    bool checkForGrammarChanges();
     bool checkIfDataGrammar();
     bool checkIfTextGrammar();
 
@@ -32,9 +35,11 @@ private:
     InstructionParser* instructionProcessor;
 
     tokenList::iterator tokenIter;
+    tokenList::iterator tokenAtStartOfCurrentLine;
     tokenList tokenStream;
     tokenList tokenStreamSafeCopy;
     tokenList tokensOnCurrentLine;
+    size_t currentLineNum;
 
     bool dataGrammarActive;
     bool textGrammarActive;

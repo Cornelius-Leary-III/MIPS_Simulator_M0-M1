@@ -12,6 +12,8 @@ bool DeclarationParser::parse_Declaration()
 
     if (parse_Constant())
     {
+        //TODO: determine where it is best to increment the current token in order to accurately parse.
+
         ++currentToken;
         if (currentToken->type() == EOL)
         {
@@ -229,6 +231,101 @@ bool DeclarationParser::parse_StringLayout()
     currentToken = savedToken;
     return false;
 }
+
+bool DeclarationParser::parse_Integer()
+{
+    auto savedToken = currentToken;
+    if (currentToken->type() != STRING)
+    {
+        return false;
+    }
+
+    string tokenContents;
+    tokenContents = currentToken->contents();
+
+    auto currentChar = tokenContents.begin();
+    auto charEnd = tokenContents.end();
+
+    if (*currentChar == '+')
+    {
+        ++currentChar;
+    }
+    else if (*currentChar == '-')
+    {
+        ++currentChar;
+    }
+
+    while (currentChar != charEnd)
+    {
+        if (!parse_Digit(*currentChar))
+        {
+            currentToken = savedToken;
+            return false;
+        }
+
+        ++currentChar;
+    }
+
+    return true;
+}
+
+bool DeclarationParser::parse_String()
+{
+    auto savedToken = currentToken;
+    if (currentToken->type() != STRING_DELIM)
+    {
+        return false;
+    }
+
+    ++currentToken;
+
+    if (currentToken->type() != STRING)
+    {
+        currentToken = savedToken;
+        return false;
+    }
+
+    string tokenContents;
+    tokenContents = currentToken->contents();
+
+    auto currentChar = tokenContents.begin();
+    auto charEnd = tokenContents.end();
+
+    while (currentChar != charEnd)
+    {
+        if (!parse_Char(*currentChar))
+        {
+            currentToken = savedToken;
+            return false;
+        }
+
+        ++currentChar;
+    }
+
+    return true;
+}
+
+bool DeclarationParser::parse_Alpha(char currentChar)
+{
+    return isalpha(currentChar);
+}
+
+bool DeclarationParser::parse_Digit(char currentChar)
+{
+    return isdigit(currentChar);
+}
+
+bool DeclarationParser::parse_Char(char currentChar)
+{
+    return isprint(currentChar);
+}
+
+
+
+
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 #include "tst_tokentest.h"
 #include "tst_lexertest.h"
 #include "tst_parsertest.h"
+#include "tst_declarationparsertest.h"
 
 #include <gtest/gtest.h>
 
