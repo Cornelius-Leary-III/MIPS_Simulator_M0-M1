@@ -471,6 +471,7 @@ bool InstructionParser::parse_IAI_div()
             }
         }
 
+        --currentToken;
         return true;
     }
 
@@ -841,7 +842,8 @@ bool InstructionParser::parse_Immediate()
         if (!parse_Alpha(*contentChar) &&
             !parse_Digit(*contentChar))
         {
-            break;
+            currentToken = savedToken;
+            return false;
         }
         ++contentChar;
     }
