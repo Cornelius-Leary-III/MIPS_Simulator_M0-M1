@@ -23,7 +23,7 @@ TEST(declarationParserTest, constant_pass)
     EXPECT_TRUE(testParser.parseStream());
 }
 
-nullptr
+TEST(declarationParserTest, constant_fail)
 {
     string testString = ".data\nconstantA = H2";
 

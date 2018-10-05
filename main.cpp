@@ -2,6 +2,7 @@
 #include "tst_lexertest.h"
 #include "tst_parsertest.h"
 #include "tst_declarationparsertest.h"
+#include "tst_instructionparsertest.h"
 
 #include <gtest/gtest.h>
 
