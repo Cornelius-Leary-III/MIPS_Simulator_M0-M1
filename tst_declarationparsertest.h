@@ -23,7 +23,7 @@ TEST(declarationParserTest, constant_pass)
     EXPECT_TRUE(testParser.parseStream());
 }
 
-TEST(declarationParserTest, constant_fail)
+nullptr
 {
     string testString = ".data\nconstantA = H2";
 
@@ -44,7 +44,8 @@ TEST(declarationParserTest, constant_fail_splitByEOL)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, constant_fail_digitFirstChar)
 {
@@ -55,7 +56,8 @@ TEST(declarationParserTest, constant_fail_digitFirstChar)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, label_pass)
 {
@@ -66,7 +68,8 @@ TEST(declarationParserTest, label_pass)
 
     parser testParser(testSS);
 
-    EXPECT_TRUE(testParser.parseStream());}
+    EXPECT_TRUE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, label_fail_noColonChar)
 {
@@ -77,7 +80,8 @@ TEST(declarationParserTest, label_fail_noColonChar)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, label_fail_spaceBetweenTextAndColonChar)
 {
@@ -88,7 +92,8 @@ TEST(declarationParserTest, label_fail_spaceBetweenTextAndColonChar)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, label_fail_digitFirstChar)
 {
@@ -99,7 +104,8 @@ TEST(declarationParserTest, label_fail_digitFirstChar)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_word_pass)
 {
@@ -110,7 +116,8 @@ TEST(declarationParserTest, layout_intLayout_word_pass)
 
     parser testParser(testSS);
 
-    EXPECT_TRUE(testParser.parseStream());}
+    EXPECT_TRUE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_word_fail)
 {
@@ -121,7 +128,8 @@ TEST(declarationParserTest, layout_intLayout_word_fail)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_half_pass)
 {
@@ -132,7 +140,8 @@ TEST(declarationParserTest, layout_intLayout_half_pass)
 
     parser testParser(testSS);
 
-    EXPECT_TRUE(testParser.parseStream());}
+    EXPECT_TRUE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_half_fail)
 {
@@ -143,7 +152,8 @@ TEST(declarationParserTest, layout_intLayout_half_fail)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_byte_pass)
 {
@@ -154,7 +164,8 @@ TEST(declarationParserTest, layout_intLayout_byte_pass)
 
     parser testParser(testSS);
 
-    EXPECT_TRUE(testParser.parseStream());}
+    EXPECT_TRUE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_byte_fail)
 {
@@ -165,7 +176,8 @@ TEST(declarationParserTest, layout_intLayout_byte_fail)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_space_pass)
 {
@@ -176,7 +188,8 @@ TEST(declarationParserTest, layout_intLayout_space_pass)
 
     parser testParser(testSS);
 
-    EXPECT_TRUE(testParser.parseStream());}
+    EXPECT_TRUE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_space_fail)
 {
@@ -187,7 +200,8 @@ TEST(declarationParserTest, layout_intLayout_space_fail)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_fail_invalidLayoutKeyword_1)
 {
@@ -198,7 +212,8 @@ TEST(declarationParserTest, layout_intLayout_fail_invalidLayoutKeyword_1)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_intLayout_fail_invalidLayoutKeyword_2)
 {
@@ -209,7 +224,8 @@ TEST(declarationParserTest, layout_intLayout_fail_invalidLayoutKeyword_2)
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_stringLayout_ascii_pass)
 {
@@ -220,7 +236,8 @@ TEST(declarationParserTest, layout_stringLayout_ascii_pass)
 
     parser testParser(testSS);
 
-    EXPECT_TRUE(testParser.parseStream());}
+    EXPECT_TRUE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_stringLayout_asciiz_pass)
 {
@@ -231,7 +248,8 @@ TEST(declarationParserTest, layout_stringLayout_asciiz_pass)
 
     parser testParser(testSS);
 
-    EXPECT_TRUE(testParser.parseStream());}
+    EXPECT_TRUE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_stringLayout_ascii_fail_missingClosingStringDelimChar)
 {
@@ -242,7 +260,8 @@ TEST(declarationParserTest, layout_stringLayout_ascii_fail_missingClosingStringD
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_stringLayout_asciiz_fail_missingOpeningStringDelimChar)
 {
@@ -253,7 +272,8 @@ TEST(declarationParserTest, layout_stringLayout_asciiz_fail_missingOpeningString
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_stringLayout_ascii_fail_missingBothStringDelimChars)
 {
@@ -264,7 +284,8 @@ TEST(declarationParserTest, layout_stringLayout_ascii_fail_missingBothStringDeli
 
     parser testParser(testSS);
 
-    EXPECT_FALSE(testParser.parseStream());}
+    EXPECT_FALSE(testParser.parseStream());
+}
 
 TEST(declarationParserTest, layout_stringLayout_asciiz_fail_oddNumberOfStringDelimChars)
 {

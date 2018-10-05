@@ -17,9 +17,7 @@ public:
 
     parser(std::istream& streamToParse);
 
-    void setupParser();
     bool parseStream();
-//    bool isParsingSuccessful();
 
     bool checkForGrammarChanges();
     bool checkIfDataGrammar();
@@ -44,14 +42,12 @@ private:
 
     tokenVector::iterator tokenIter;
     tokenVector::iterator tokensEnd;
-    tokenVector::iterator tokenAtStartOfCurrentLine;
     tokenVector tokenStream;
     tokenVector tokensOnCurrentLine;
     size_t currentLineNum;
 
     bool dataGrammarActive;
     bool textGrammarActive;
-
     bool streamParsedSafely;
 
 
