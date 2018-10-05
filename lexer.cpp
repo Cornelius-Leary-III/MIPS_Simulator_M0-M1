@@ -7,6 +7,7 @@ lexer::lexer()
     parenthesesError = false;
     stringDelimiterError = false;
 
+    currentTokenId = 1;
     currentLine = 1;
     parenthesesDepth = 0;
     currentCharSequence;
@@ -49,7 +50,7 @@ void lexer::tokenizeStream(std::istream& input)
     handleERROR();
 }
 
-tokenList& lexer::getTokens()
+tokenVector& lexer::getTokens()
 {
     return tokenizedText;
 }
@@ -231,7 +232,8 @@ void lexer::handleSTRING_DELIM()
 
 void lexer::addTokenWithoutContents(TokenType currentTokenType)
 {
-    tokenizedText.emplace_back(currentTokenType, currentLine);
+    tokenizedText.emplace_back(currentTokenType, currentTokenId, currentLine);
+    ++currentTokenId;
 }
 
 void lexer::handleSTRING()
@@ -244,7 +246,8 @@ void lexer::handleSTRING()
 
 void lexer::addTokenSTRING()
 {
-    tokenizedText.emplace_back(STRING, currentLine, currentCharSequence);
+    tokenizedText.emplace_back(STRING, currentTokenId, currentLine, currentCharSequence);
+    ++currentTokenId;
     currentCharSequence.clear();
 }
 
@@ -268,7 +271,8 @@ void lexer::handleERROR()
 
 void lexer::addTokenStringDelimiterError()
 {
-    tokenizedText.emplace_back(ERROR, currentLine, "ERROR: missing STRING_DELIM character");
+    tokenizedText.emplace_back(ERROR, currentTokenId, currentLine, "ERROR: missing STRING_DELIM character");
+    ++currentTokenId;
 }
 
 void lexer::addTokenParenthesesError()
@@ -276,7 +280,8 @@ void lexer::addTokenParenthesesError()
     std::stringstream ss;
     ss << "ERROR: unmatched parentheses --> depth = " << parenthesesDepth;
 
-    tokenizedText.emplace_back(ERROR, currentLine, ss.str());
+    tokenizedText.emplace_back(ERROR, currentTokenId, currentLine, ss.str());
+    ++currentTokenId;
 }
 
 bool lexer::isStringDelimiterErrorPresent()

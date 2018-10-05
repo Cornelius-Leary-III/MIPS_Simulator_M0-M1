@@ -1,6 +1,6 @@
 #include "InstructionParser.h"
 
-InstructionParser::InstructionParser(const tokenList& currentLineToParse)
+InstructionParser::InstructionParser(const tokenVector& currentLineToParse)
 {
     lineOfTokens = currentLineToParse;
     currentToken = lineOfTokens.begin();

@@ -1,6 +1,6 @@
 #include "DeclarationParser.h"
 
-DeclarationParser::DeclarationParser(const tokenList& currentLineToParse)
+DeclarationParser::DeclarationParser(const tokenVector& currentLineToParse)
 {
     lineOfTokens = currentLineToParse;
     currentToken = lineOfTokens.begin();

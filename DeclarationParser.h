@@ -9,7 +9,7 @@ using std::string;
 class DeclarationParser
 {
 public:
-    DeclarationParser(const tokenList& currentLineToParse);
+    DeclarationParser(const tokenVector& currentLineToParse);
 
     bool parse_Declaration();
     bool parse_Constant();
@@ -25,8 +25,8 @@ public:
 
 private:
 
-    tokenList lineOfTokens;
-    tokenList::iterator currentToken;
+    tokenVector lineOfTokens;
+    tokenVector::iterator currentToken;
 
 };
 

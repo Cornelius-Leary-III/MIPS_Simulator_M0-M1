@@ -6,7 +6,7 @@
 class InstructionParser
 {
 public:
-    InstructionParser(const tokenList& currentLineToParse);
+    InstructionParser(const tokenVector& currentLineToParse);
 
     bool parse_Instruction();
     bool parse_LabelForInstruction();
@@ -22,8 +22,8 @@ public:
 
 private:
 
-    tokenList lineOfTokens;
-    tokenList::iterator currentToken;
+    tokenVector lineOfTokens;
+    tokenVector::iterator currentToken;
 
 };
 

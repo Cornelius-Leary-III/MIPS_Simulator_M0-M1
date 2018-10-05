@@ -15,7 +15,7 @@ public:
 
     void tokenizeStream(std::istream& input);
 
-    tokenList& getTokens();
+    tokenVector& getTokens();
 
 //    bool isValid();
 //    void checkForErrors();
@@ -50,8 +50,9 @@ public:
 
 protected:
 
-    tokenList tokenizedText;
+    tokenVector tokenizedText;
 
+    size_t currentTokenId;
     size_t currentLine;
     string currentCharSequence;
 

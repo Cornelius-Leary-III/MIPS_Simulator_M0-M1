@@ -1,88 +1,88 @@
 #include "parser.h"
 
-parser::parser()
-{
-    tokenizer;
-    tokenStream;
-    tokensOnCurrentLine;
-    currentLineNum = 1;
-
-    streamParsedSafely = true;
-
-    dataGrammarActive = false;
-    textGrammarActive = false;
-
-    declarationProcessor = nullptr;
-    instructionProcessor = nullptr;
-}
-
-bool parser::parseStream(std::istream& streamToParse)
+parser::parser(std::istream& streamToParse)
 {
     tokenizer.tokenizeStream(streamToParse);
-
     tokenStream = tokenizer.getTokens();
-    tokenStreamSafeCopy = tokenizer.getTokens();
+
     auto firstToken = tokenStream.begin();
-    tokensEnd = tokenStream.end();
-
-    tokenIter = tokenStream.begin();
-    tokenAtStartOfCurrentLine = tokenStream.begin();
-
     if (!tokenStream.empty())
     {
         currentLineNum = firstToken->line();
     }
+    else
+    {
+        currentLineNum = 1;
+    }
 
-    int loopCounter = 0;
-    int grammarChangeCounter = 0;
-    int dataGrammarCounter = 0;
-    int textGrammarCounter = 0;
-    int elseOptionGrammar = 0;
+    tokenIter = tokenStream.begin();
+    tokensEnd = tokenStream.end();
 
-    token tokenStateAtStartOfLoop = *tokenIter;
-    token tokenStateInMiddleOfLoop = *tokenIter;
-    token tokenStateAtEndOfLoop = *tokenIter;
+    tokensOnCurrentLine;
 
-    tokenList::iterator parsingLoopIter = tokenIter;
+    streamParsedSafely = true;
+    dataGrammarActive = false;
+    textGrammarActive = false;
+    declarationProcessor = nullptr;
+    instructionProcessor = nullptr;
 
-    while (parsingLoopIter != tokensEnd &&
+    groupTokensByLine();
+    fileLineIter = fileSplitUpByLines.begin();
+    fileEnd = fileSplitUpByLines.end();
+}
+
+bool parser::parseStream()
+{
+    while (fileLineIter != fileEnd &&
            streamParsedSafely)
     {
-        parsingLoopIter = tokenIter;
-
         if (checkForGrammarChanges())
         {
-            ++tokenIter;
-            ++grammarChangeCounter;
+
         }
         else if (dataGrammarActive)
         {
             streamParsedSafely = dataGrammarParsing();
-
-            ++dataGrammarCounter;
         }
         else if (textGrammarActive)
         {
             streamParsedSafely = textGrammarParsing();
-
-            ++textGrammarCounter;
         }
         else
         {
-            ++elseOptionGrammar;
+
         }
 
-        tokenStateInMiddleOfLoop = *tokenIter;
-
-        updateTokenIter();
-        getAllTokensOnCurrentLine();
-
-        tokenStateAtEndOfLoop = *tokenIter;
-
-        ++loopCounter;
+        ++fileLineIter;
     }
 
     return streamParsedSafely;
+}
+
+void parser::groupTokensByLine()
+{
+    size_t lineInFile = tokenIter->line();
+
+    while (tokenIter != tokensEnd)
+    {
+        if (tokenIter->line() == lineInFile)
+        {
+            tokensOnCurrentLine.push_back(*tokenIter);
+            ++tokenIter;
+        }
+        else
+        {
+            fileSplitUpByLines.push_back(tokensOnCurrentLine);
+            tokensOnCurrentLine.clear();
+
+            lineInFile = tokenIter->line();
+        }
+    }
+
+    if (!tokensOnCurrentLine.empty())
+    {
+        fileSplitUpByLines.push_back(tokensOnCurrentLine);
+    }
 }
 
 bool parser::dataGrammarParsing()
@@ -93,7 +93,7 @@ bool parser::dataGrammarParsing()
         declarationProcessor = nullptr;
     }
 
-    declarationProcessor = new DeclarationParser(tokensOnCurrentLine);
+    declarationProcessor = new DeclarationParser(*fileLineIter);
     return declarationProcessor->parse_Declaration();
 }
 
@@ -105,15 +105,13 @@ bool parser::textGrammarParsing()
         instructionProcessor = nullptr;
     }
 
-    instructionProcessor = new InstructionParser(tokensOnCurrentLine);
+    instructionProcessor = new InstructionParser(*fileLineIter);
     return instructionProcessor->parse_Instruction();
 }
 
 
 bool parser::checkForGrammarChanges()
 {
-    auto savedTokenIter = tokenIter;
-
     if (checkIfDataGrammar())
     {
         dataGrammarActive = true;
@@ -126,7 +124,6 @@ bool parser::checkForGrammarChanges()
     }
     else
     {
-        tokenIter = savedTokenIter;
         return false;
     }
 
@@ -135,21 +132,20 @@ bool parser::checkForGrammarChanges()
 
 bool parser::checkIfDataGrammar()
 {
-    auto savedTokenIter = tokenIter;
+    auto localTokenIter = fileLineIter->begin();
 
-    if (tokenIter->type() != STRING)
+    if (localTokenIter->type() != STRING)
     {
         return false;
     }
 
-    if (tokenIter->contents() != ".data")
+    if (localTokenIter->contents() != ".data")
     {
         return false;
     }
 
-    if ((++tokenIter)->type() != EOL)
+    if ((++localTokenIter)->type() != EOL)
     {
-        tokenIter = savedTokenIter;
         return false;
     }
 
@@ -158,56 +154,25 @@ bool parser::checkIfDataGrammar()
 
 bool parser::checkIfTextGrammar()
 {
-    auto savedTokenIter = tokenIter;
+    auto localTokenIter = fileLineIter->begin();
 
-    if (tokenIter->type() != STRING)
+    if (localTokenIter->type() != STRING)
     {
         return false;
     }
 
-    if (tokenIter->contents() != ".text")
+    if (localTokenIter->contents() != ".text")
     {
         return false;
     }
 
-    if ((++tokenIter)->type() != EOL)
+    if ((++localTokenIter)->type() != EOL)
     {
-        tokenIter = savedTokenIter;
         return false;
     }
 
     return true;
 }
-
-void parser::getAllTokensOnCurrentLine()
-{
-    ++currentLineNum;
-
-    token debugStartOfCurrentLineToken = *tokenIter;
-
-    tokensOnCurrentLine.clear();
-
-    while (tokenIter != tokensEnd &&
-           tokenIter->line() == currentLineNum)
-    {
-        tokensOnCurrentLine.push_back(*tokenIter);
-        ++tokenIter;
-    }
-}
-
-void parser::updateTokenIter()
-{
-    int tokenIncrCounter = 0;
-
-    while (tokenAtStartOfCurrentLine != tokensEnd &&
-           tokenAtStartOfCurrentLine->line() != currentLineNum)
-    {
-        ++tokenAtStartOfCurrentLine;
-        ++tokenIncrCounter;
-    }
-}
-
-
 
 
 

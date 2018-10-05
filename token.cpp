@@ -1,18 +1,33 @@
 #include "token.h"
 
-token::token(TokenType newType, std::size_t newLineNumber)
-    : typeOfToken(newType), lineNumber(newLineNumber)
+token::token(TokenType newType,
+             std::size_t newIdNumber,
+             std::size_t newLineNumber)
+    : typeOfToken(newType),
+      idNumber(newIdNumber),
+      lineNumber(newLineNumber)
 {
 }
 
-token::token(TokenType newType, std::size_t newLineNumber, const std::string& newContents)
-    : typeOfToken(newType), lineNumber(newLineNumber), tokenContents(newContents)
+token::token(TokenType newType,
+             std::size_t newIdNumber,
+             std::size_t newLineNumber,
+             const std::string& newContents)
+    : typeOfToken(newType),
+      idNumber(newIdNumber),
+      lineNumber(newLineNumber),
+      tokenContents(newContents)
 {
 }
 
 TokenType token::type() const
 {
     return typeOfToken;
+}
+
+std::size_t token::id() const
+{
+    return idNumber;
 }
 
 std::size_t token::line() const
@@ -28,6 +43,7 @@ std::string token::contents() const
 bool operator==(const token& lhs, const token& rhs)
 {
     return (lhs.type() == rhs.type()) &&
+            (lhs.id() == rhs.id()) &&
             (lhs.line() == rhs.line()) &&
             (lhs.contents() == rhs.contents());
 }
@@ -85,7 +101,8 @@ std::ostream& operator<<(std::ostream& oss, const token& tokenToPass)
     }
     }
 
-    oss << "\t\tToken on line #" << std::setw(5) << tokenToPass.line()
+    oss << "\t\tToken #" << std::setw(5) << tokenToPass.id()
+        << " on line #" << std::setw(5) << tokenToPass.line()
         << std::setw(15) << typeString;
 
     if (!tokenToPass.contents().empty())

@@ -5,6 +5,9 @@
 #include "DeclarationParser.h"
 #include "InstructionParser.h"
 
+#include <vector>
+using std::vector;
+
 #include <sstream>
 using std::stringstream;
 
@@ -12,10 +15,10 @@ class parser
 {
 public:
 
-    parser();
-//    parser(const string& fileToParse);
+    parser(std::istream& streamToParse);
 
-    bool parseStream(std::istream& streamToParse);
+    void setupParser();
+    bool parseStream();
 //    bool isParsingSuccessful();
 
     bool checkForGrammarChanges();
@@ -29,17 +32,21 @@ private:
 
     void getAllTokensOnCurrentLine();
     void updateTokenIter();
+    void groupTokensByLine();
+
+    vector<tokenVector> fileSplitUpByLines;
+    vector<tokenVector>::iterator fileLineIter;
+    vector<tokenVector>::iterator fileEnd;
 
     lexer tokenizer;
     DeclarationParser* declarationProcessor;
     InstructionParser* instructionProcessor;
 
-    tokenList::iterator tokenIter;
-    tokenList::iterator tokensEnd;
-    tokenList::iterator tokenAtStartOfCurrentLine;
-    tokenList tokenStream;
-    tokenList tokenStreamSafeCopy;
-    tokenList tokensOnCurrentLine;
+    tokenVector::iterator tokenIter;
+    tokenVector::iterator tokensEnd;
+    tokenVector::iterator tokenAtStartOfCurrentLine;
+    tokenVector tokenStream;
+    tokenVector tokensOnCurrentLine;
     size_t currentLineNum;
 
     bool dataGrammarActive;
